@@ -121,14 +121,3 @@ def renameFiles(directory, matches, missing, extra, writeMessages=False, dryRun=
                 outfile = open(os.path.join(directory, 'messages.txt'), 'w')
                 outfile.write(messages)
                 outfile.close()
-
-            gradePath = os.path.join(directory, 'grade.txt')
-            if os.path.exists(gradePath):
-                infile = open(gradePath, 'r')
-                data = infile.read()
-                infile.close()
-                data = 60 * '#' + '\n\n' + messages + 60 * '#' + '\n\n' + data
-                outfile = open(gradePath, 'w')
-                outfile.write(messages)
-                outfile.close()
-        
