@@ -1,12 +1,47 @@
+#!/usr/bin/env python3.6
+
+# ----------------------------------------------------------------------
+# findFiles.py
+# Dave Reed
+# 12/27/2017
+# ----------------------------------------------------------------------
+
 import glob
 import os.path
 
+# ----------------------------------------------------------------------
+
 def findFilesInDirectory(directory, files, ignoreGradeTxt=True, filesToIgnore=None):
+
+    """look for files in directory and return dictionary with mapping of actual filenames, missing files, and extra files
+
+    :param directory: the directory to search for the files in
+    :param files: list of files that we expect to have
+    :param ignoreGradeTxt: if True, ignore files named grade.txt and grade-save.txt
+    :param filesToIgnore: list of other files to ignore
+     :return: three values: a dictionary with names from the files list that we found as keys mapping to the actual name of the file that we found,
+    a list of the names from files that are missing,
+    and a list of any extra names from listOfFiles that we did not use as dictionary values in the first return value
+    """
+
     filesInDir = [f[len(directory)+1:] for f in glob.glob(os.path.join(directory, '*'))]
     return findFilesInList(files, filesInDir, ignoreGradeTxt, filesToIgnore)
-    
+
+# ----------------------------------------------------------------------
+
 def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None):
-    
+
+    """look for files in listOfFiles and return dictionary with mapping of actual filenames, missing files, and extra files
+
+    :param files: list of files that we expect to have
+    :param listOfFiles: actual list of files
+    :param ignoreGradeTxt: if True, ignore files named grade.txt and grade-save.txt
+    :param filesToIgnore: list of other files to ignore
+    :return: three values: a dictionary with names from the files list that we found as keys mapping to the actual name of the file that we found,
+    a list of the names from files that are missing,
+    and a list of any extra names from listOfFiles that we did not use as dictionary values in the first return value
+    """
+
     helpMissing = False
 
     filesToMatch = { f : 1 for f in files }
@@ -25,7 +60,8 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
         for ignore in filesToIgnore:
             if ignore in filesInDir:
                 del filesInDir[ignore]
-        
+
+    # the dictionary mapping the name of the file we expect to find to actual name of the file
     matchDict = {}
         
     # first get exact matches
@@ -93,31 +129,55 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
     
     if helpMissing:
         filesToMatch['help.txt'] = 1
+
+    # return the dictionary mapping the name of the file we expect to find to the actual file found,
+    # the list of missing files, and the list of extra files
     return matchDict, list(filesToMatch.keys()), list(filesInDir.keys())
-    
+
+# ----------------------------------------------------------------------
+
 def renameFiles(directory, matches, missing, extra, writeMessages=False, dryRun=False):
 
+    """rename files to match their expected names using output from findFilesInList
+
+    :param directory: the path to the directory with the files
+    :param matches: dictionary mapping expected names to actual names (the first return value from the call findFilesInList)
+    :param missing: list of missing files (the second return value from the call findFilesInList)
+    :param extra:  any extra files in the directory (the third retun value from the call findFilesInList)
+    :param writeMessages: put files we renamed, missing, and extra files in messages.txt
+    :param dryRun: if True, don't actually rename files, just print out messages for what needs renamed, is missing, and extra files
+    :return: None
+    """
+
+    # list of strings with messages for incorrect files
     messages = []
     if len(missing) != 0:
+        # each missing file
         missingFiles = ', '.join(missing)
         messages.append(f'missing: {missingFiles}')
 
     for f in matches:
         if f != matches[f]:
+            # each file that will need renamed based on our matching algorithm from findFilesInList
             messages.append(f'mv {matches[f]} {f}')
             fullSource = os.path.join(directory, matches[f])
             fullDest = os.path.join(directory, f)
+            # if not a dry run, rename the file
             if not dryRun:
                 os.rename(fullSource, fullDest)
     
     if len(messages) > 0:
+        # if we are missing some files, also indicate which files are extra
         if len(extra) > 0:
             messages.append('extra: ' + ', '.join(extra))
+        # make string out of messages and output it
         messages = '\n'.join(messages) + '\n'
         print(directory + '\n' + messages)
-            
-        if not dryRun:
-            if writeMessages:
-                outfile = open(os.path.join(directory, 'messages.txt'), 'w')
-                outfile.write(messages)
-                outfile.close()
+
+        # if not a dry run and writeMessages, create the messages.txt file
+        if not dryRun and writeMessages:
+            outfile = open(os.path.join(directory, 'messages.txt'), 'w')
+            outfile.write(messages)
+            outfile.close()
+
+# ----------------------------------------------------------------------
