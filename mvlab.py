@@ -45,9 +45,18 @@ def moveFilesFromSourceToDestination(source, destination, files, overwrite=False
                 print(f'{fullDest} exists and overwrite not specified')
             else:
                 os.rename(fullSource, fullDest)
-        elif f not in ('messages.txt', 'grade.txt', 'grade-save.txt'):
+        elif f not in ('messages.txt', 'grade.txt', 'grade-save.txt', 'help.txt'):
             print(f'{fullSource} does not exist')
+
+# ----------------------------------------------------------------------
         
+def deleteIfEmpty(path):
+    files = os.listdir(path)
+    if not files:
+        try:
+            os.rmdir(path)
+        except:
+            pass
 
 # ----------------------------------------------------------------------
 
@@ -69,7 +78,7 @@ def main():
     for d in studentDirs:
         # first fix any naming issues
         matches, missing, extra = findFilesInDirectory(d, args.files)
-        renameFiles(d, matches, missing, extra, args.dryrun, args.dryrun)
+        renameFiles(d, matches, missing, extra, args.messages, args.dryrun)
         
         # now move files
         makeDirectoryAtDestinationIfDoesNotExist(args.dest, d)
@@ -77,6 +86,8 @@ def main():
         destDir = os.path.join(args.dest, d)
         
         moveFilesFromSourceToDestination(sourceDir, destDir, args.files, args.overwrite)
+        # if no files left in student directory, delete it
+        deleteIfEmpty(d)
 
 # ----------------------------------------------------------------------
 
