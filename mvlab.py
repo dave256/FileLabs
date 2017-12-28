@@ -15,6 +15,12 @@ from findFiles import *
 # ----------------------------------------------------------------------
 
 def makeDirectoryIfDoesNotExist(s):
+
+    """make directory at path s if that directory does not already exist
+
+    :param s: directory path to create
+    :return: None
+    """
     if not os.path.exists(s):
         os.mkdir(s)
     else:
@@ -24,17 +30,34 @@ def makeDirectoryIfDoesNotExist(s):
 # ----------------------------------------------------------------------
 
 def makeDirectoryAtDestinationIfDoesNotExist(dest, s):
+
+    """make directory s in dest directory if does not already exist
+
+    :param dest: the directory to make the new directory in
+    :param s: the new directory to make in dest
+    :return: None
+    """
+
     dest = os.path.expanduser(dest)
     fullPath = os.path.join(dest, s)
     makeDirectoryIfDoesNotExist(fullPath)
 
 # ----------------------------------------------------------------------
 
-def moveFilesFromSourceToDestination(source, destination, files, overwrite=False, dryRun=False):
+def moveFilesFromSourceToDestination(source, destination, files, overwrite=False):
+
+    """move files from source directory to destination directory
+
+    :param source: directory containing the source files
+    :param destination: directory to move them the files to
+    :param files: the files to move
+    :param overwrite: if True, overwrite file in destination directory
+    :param dryRun:
+    :return:
+    """
 
     files = list(files)
-    if not dryRun:
-        files.extend(['messages.txt', 'grade.txt', 'grade-save.txt'])
+    files.extend(['messages.txt', 'grade.txt', 'grade-save.txt'])
     for f in files:
         fullSource = os.path.join(source, f)
         fullDest = os.path.join(destination, f)
@@ -79,15 +102,16 @@ def main():
         # first fix any naming issues
         matches, missing, extra = findFilesInDirectory(d, args.files)
         renameFiles(d, matches, missing, extra, args.messages, args.dryrun)
-        
-        # now move files
-        makeDirectoryAtDestinationIfDoesNotExist(args.dest, d)
-        sourceDir = os.path.join(args.source, d)
-        destDir = os.path.join(args.dest, d)
-        
-        moveFilesFromSourceToDestination(sourceDir, destDir, args.files, args.overwrite)
-        # if no files left in student directory, delete it
-        deleteIfEmpty(d)
+
+        if not args.dryrun:
+            # now move files
+            makeDirectoryAtDestinationIfDoesNotExist(args.dest, d)
+            sourceDir = os.path.join(args.source, d)
+            destDir = os.path.join(args.dest, d)
+
+            moveFilesFromSourceToDestination(sourceDir, destDir, args.files, args.overwrite)
+            # if no files left in student directory, delete it
+            deleteIfEmpty(d)
 
 # ----------------------------------------------------------------------
 
