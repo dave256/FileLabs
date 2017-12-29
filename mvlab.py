@@ -113,6 +113,16 @@ def main():
             # if no files left in student directory, delete it
             deleteIfEmpty(d)
 
+            # now tar up moved files
+            dest = args.dest.strip()
+            if dest[-1] == '/':
+                dest = dest[:-1]
+            head, tail = os.path.split(dest)
+            os.chdir(head)
+            cmd = f'tar zcf {tail}.tar.gz {tail}'
+            os.system(cmd)
+
+
 # ----------------------------------------------------------------------
 
 if __name__ == '__main__':
