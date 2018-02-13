@@ -94,6 +94,9 @@ def main():
     parser.set_defaults(dryrun=False, overwrite=False, messages=True)
     args = parser.parse_args()
     
+    if os.path.exists("Grade") and os.path.isdir("Grade"):
+        os.chdir("Grade")
+    
     makeDirectoryIfDoesNotExist(args.dest)
 
     os.chdir(args.source)
