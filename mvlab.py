@@ -44,7 +44,7 @@ def makeDirectoryAtDestinationIfDoesNotExist(dest, s):
 
 # ----------------------------------------------------------------------
 
-def moveFilesFromSourceToDestination(source, destination, files, overwrite=False):
+def moveFilesFromSourceToDestination(source, destination, files, extraFiles, overwrite=False):
 
     """move files from source directory to destination directory
 
@@ -70,6 +70,17 @@ def moveFilesFromSourceToDestination(source, destination, files, overwrite=False
                 os.rename(fullSource, fullDest)
         elif f not in ('messages.txt', 'grade.txt', 'grade-save.txt', 'help.txt'):
             print(f'{fullSource} does not exist')
+            
+    for f in extraFiles:
+        fullSource = os.path.join(source, f)
+        fullDest = os.path.join(destination, f)
+        sourceExists = os.path.exists(fullSource)
+        destExists = os.path.exists(fullDest)
+        if sourceExists:
+            if destExists and not overwrite:
+                print(f'{fullDest} exists and overwrite not specified')
+            else:
+                os.rename(fullSource, fullDest)
 
 # ----------------------------------------------------------------------
         
@@ -91,6 +102,7 @@ def main():
     parser.add_argument('-n', '--no-messages', dest='messages', action='store_false', help='write messages.txt with info')
     parser.add_argument('dest', type=str, metavar="destination-directory", help="destination directory to put subdirectories and files in")
     parser.add_argument('files', type=str, nargs='+')
+    parser.add_argument('-e', '--extra', dest='optionalFiles', type=str, nargs='+')
     parser.set_defaults(dryrun=False, overwrite=False, messages=True)
     args = parser.parse_args()
     
@@ -103,7 +115,7 @@ def main():
     studentDirs = [s for s in glob.glob('*') if os.path.isdir(s)]
     for d in studentDirs:
         # first fix any naming issues
-        matches, missing, extra = findFilesInDirectory(d, args.files)
+        matches, missing, extra = findFilesInDirectory(d, args.files, True, args.optionalFiles)
         renameFiles(d, matches, missing, extra, args.messages, args.dryrun)
 
         if not args.dryrun:
@@ -112,7 +124,7 @@ def main():
             sourceDir = os.path.join(args.source, d)
             destDir = os.path.join(args.dest, d)
 
-            moveFilesFromSourceToDestination(sourceDir, destDir, args.files, args.overwrite)
+            moveFilesFromSourceToDestination(sourceDir, destDir, args.files, args.optionalFiles, args.overwrite)
             # if no files left in student directory, delete it
             deleteIfEmpty(d)
 
