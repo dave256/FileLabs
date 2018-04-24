@@ -60,8 +60,7 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
         for ignore in filesToIgnore:
             if ignore in filesInDir:
                 del filesInDir[ignore]
-    print("filesToIgnore", filesToIgnore)
-    print(filesInDir)
+ 
     # the dictionary mapping the name of the file we expect to find to actual name of the file
     matchDict = {}
         
