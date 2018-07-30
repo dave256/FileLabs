@@ -44,18 +44,21 @@ def makeDirectoryAtDestinationIfDoesNotExist(dest, s):
 
 # ----------------------------------------------------------------------
 
-def moveFilesFromSourceToDestination(source, destination, files, extraFiles, overwrite=False):
+def moveFilesFromSourceToDestination(source, destination, files, extraFiles=None, overwrite=False):
 
     """move files from source directory to destination directory
 
     :param source: directory containing the source files
     :param destination: directory to move them the files to
     :param files: the files to move
+    :param extraFiles: any extra files
     :param overwrite: if True, overwrite file in destination directory
     :param dryRun:
     :return:
     """
 
+    if extraFiles is None:
+        extraFiles = []
     files = list(files)
     files.extend(['messages.txt', 'grade.txt', 'grade-save.txt'])
     for f in files:
