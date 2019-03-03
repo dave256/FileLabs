@@ -100,11 +100,12 @@ def deleteIfEmpty(path):
 
 def main():
     parser = argparse.ArgumentParser(description='move files in directories of source directory to subdirectories in destination folder')
-    parser.add_argument('-s', '--source', default='.', help="source directory")
+    parser.add_argument('-s', '--source', default='.', help='source directory')
     parser.add_argument('-o', '--overwrite', dest='overwrite', help='overwrite existing files')
     parser.add_argument('-d', '--dryrun', dest='dryrun', action='store_true', help='dryrun - do not rename files')
     parser.add_argument('-n', '--no-messages', dest='messages', action='store_false', help='write messages.txt with info')
-    parser.add_argument('dest', type=str, metavar="destination-directory", help="destination directory to put subdirectories and files in")
+    parser.add_argument('-r', '--rename-headers', dest='renameHeaders', action='store_true', help='rename .h to .hpp')
+    parser.add_argument('dest', type=str, metavar='destination-directory', help='destination directory to put subdirectories and files in')
     parser.add_argument('files', type=str, nargs='+')
     parser.add_argument('-e', '--extra', dest='optionalFiles', type=str, nargs='+')
     parser.set_defaults(dryrun=False, overwrite=False, messages=True)
@@ -118,7 +119,16 @@ def main():
     os.chdir(args.source)
     studentDirs = [s for s in glob.glob('*') if os.path.isdir(s)]
     for d in studentDirs:
-        # first fix any naming issues
+        # first if rename headers flag and not dry run, rename .h to .hpp
+        if args.renameHeaders and not args.dryrun:
+            files = glob.glob(f"{d}/*")
+            for f in files:
+                fBase, fExt = os.path.splitext(f)
+                if fExt == ".h":
+                    newName = ".".join((fBase, "hpp"))
+                    os.rename(f, newName)
+        
+        # next fix any naming issues
         matches, missing, extra = findFilesInDirectory(d, args.files, True, args.optionalFiles)
         renameFiles(d, matches, missing, extra, args.messages, args.dryrun)
 
