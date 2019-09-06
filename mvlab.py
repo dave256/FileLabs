@@ -68,7 +68,13 @@ def moveFilesFromSourceToDestination(source, destination, files, extraFiles=None
         destExists = os.path.exists(fullDest)
         if sourceExists:
             if destExists and not overwrite:
-                if f != 'grade.txt':
+                if f == 'grade.txt' or f == 'messages.txt':
+                    # combine the contents of these files if they already exist
+                    tempFile = os.path.join(source, "newTempFile.txt")
+                    cmd = f"cat {fullDest} {fullSource} > {tempFile}"
+                    os.system(cmd)
+                    os.rename(tempFile, fullDest)
+                else:
                     print(f'{fullDest} exists and overwrite not specified')
             else:
                 os.rename(fullSource, fullDest)
