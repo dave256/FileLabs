@@ -11,7 +11,7 @@ import os.path
 
 # ----------------------------------------------------------------------
 
-def findFilesInDirectory(directory, files, ignoreGradeTxt=True, filesToIgnore=None):
+def findFilesInDirectory(directory, files=None, ignoreGradeTxt=True, filesToIgnore=None):
 
     """look for files in directory and return dictionary with mapping of actual filenames, missing files, and extra files
 
@@ -42,6 +42,13 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
     and a list of any extra names from listOfFiles that we did not use as dictionary values in the first return value
     """
 
+    if files is None:
+        files = listOfFiles
+        try:
+            files.remove("grade.txt")
+        except:
+            pass
+        
     helpMissing = False
 
     filesToMatch = { f : 1 for f in files }

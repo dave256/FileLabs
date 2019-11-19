@@ -44,7 +44,7 @@ def makeDirectoryAtDestinationIfDoesNotExist(dest, s):
 
 # ----------------------------------------------------------------------
 
-def moveFilesFromSourceToDestination(source, destination, files, extraFiles=None, overwrite=False):
+def moveFilesFromSourceToDestination(source, destination, files=None, extraFiles=None, overwrite=False):
 
     """move files from source directory to destination directory
 
@@ -56,7 +56,14 @@ def moveFilesFromSourceToDestination(source, destination, files, extraFiles=None
     :param dryRun:
     :return:
     """
-
+    
+    # if default None, move all files
+    if files is None:
+        # get all files in directory
+        files = glob.glob(f"{source}/*")
+        # get just last file path
+        files = [f.split("/")[-1] for f in files]
+        
     if extraFiles is None:
         extraFiles = []
     files = list(files)
@@ -112,10 +119,14 @@ def main():
     parser.add_argument('-n', '--no-messages', dest='messages', action='store_false', help='write messages.txt with info')
     parser.add_argument('-r', '--rename-headers', dest='renameHeaders', action='store_true', help='rename .h to .hpp')
     parser.add_argument('dest', type=str, metavar='destination-directory', help='destination directory to put subdirectories and files in')
-    parser.add_argument('files', type=str, nargs='+')
+    parser.add_argument('files', type=str, nargs='*')
     parser.add_argument('-e', '--extra', dest='optionalFiles', type=str, nargs='+')
+    parser.add_argument('-a', '--all', dest='allFiles', action='store_true', default=False)
+
     parser.set_defaults(dryrun=False, overwrite=False, messages=True)
     args = parser.parse_args()
+    if args.allFiles:
+        args.files = None
     
     if os.path.exists("Grade") and os.path.isdir("Grade"):
         os.chdir("Grade")
