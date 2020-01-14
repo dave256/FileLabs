@@ -98,6 +98,11 @@ def moveFilesFromSourceToDestination(source, destination, files=None, extraFiles
                 print(f'{fullDest} exists and overwrite not specified')
             else:
                 os.rename(fullSource, fullDest)
+    
+    # create grade.txt if does not exist
+    fullGradePath = os.path.join(destination, "grade.txt")
+    if not os.path.exists(fullGradePath):
+        os.system(f"touch {fullGradePath}")
 
 # ----------------------------------------------------------------------
         
