@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------
 
 import os
+import os.path
 import csv
 
 class Student:
@@ -29,6 +30,30 @@ class Student:
 
 # ----------------------------------------------------------------------
 
+class Course:
+    
+    def __init__(self, courseWithSection, rosterFileName):
+        self._name = courseWithSection
+        self._rosterFilename = rosterFileName
+        self._students = []
+
+    def filename(self):
+        return self._rosterFilename
+
+    def rosterDirectory(self):
+        return os.path.dirname(self._rosterFilename)
+
+    def name(self):
+        return self._name
+
+    def addStudent(self, s):
+        self._students.append(s)
+        
+    def students(self):
+        return self._students
+    
+# ----------------------------------------------------------------------
+
 class RosterInfo:
 
     def __init__(self):
@@ -36,6 +61,12 @@ class RosterInfo:
         self.lastNameToStudent = {}
         self.fullNameToStudent = {}
         self.emailToStudent = {}
+        self._courses = []
+
+    # ------------------------------------------------------------------
+
+    def courses(self):
+        return self._courses
 
     # ------------------------------------------------------------------
 
@@ -79,12 +110,20 @@ class RosterInfo:
                 del self.lastNameToStudent[lastName]
 
         s.addCourse(course)
+        return s
+
+    # ------------------------------------------------------------------
+    
+    def courseAndFilenames():
+        return self._courseAndFilenames
 
     # ------------------------------------------------------------------
 
     def readRosters(self, courseAndFilenames: tuple):
-
+        self._courseAndFilenames = courseAndFilenames
         for course, filename in courseAndFilenames:
+            courseObject = Course(course, filename)
+            self._courses.append(courseObject)
             csvReader = csv.reader(filename, delimiter=',')
             lineCount = 0
             headerDict = {}
@@ -113,7 +152,8 @@ class RosterInfo:
                         firstName = row[firstNameIndex]
                         lastName = row[lastNameIndex]
                         email = row[emailIndex]
-                        self._addOrUpdateStudent(firstName, lastName, email, course)
+                        s = self._addOrUpdateStudent(firstName, lastName, email, course)
+                        courseObject.addStudent(s)
 
                     lineCount += 1
 
