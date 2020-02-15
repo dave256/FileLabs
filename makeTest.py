@@ -24,10 +24,11 @@ def makeHelpTxt(inDirectory):
     outfile.close()
     
 def main():
+    fakeEmail = "f@capital.edu"
     HOME = os.getenv('HOME', '/Users/dreed')
     TESTPATH = f'{HOME}/Labs/Test'
-    PATH = f'{HOME}/Labs/Test/Grade/dreed@capital.edu'
-    parser = argparse.ArgumentParser(description='make test directory ~/Labs/Test/Grade/dreed@capital.edu with files from command line')
+    PATH = f'{HOME}/Labs/Test/Grade/{fakeEmail}'
+    parser = argparse.ArgumentParser(description=f'make test directory ~/Labs/Test/Grade/{fakeEmail} with files from command line')
     parser.add_argument('-a', '--add-help', dest='addHelp', action='store_true', help='make help.txt file')
     parser.add_argument('files', type=str, nargs='+')
     parser.set_defaults(addHelp=False)
