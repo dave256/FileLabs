@@ -8,6 +8,7 @@
 
 import argparse
 import os.path
+import shutil
 import glob
 
 from findFiles import *
@@ -85,6 +86,8 @@ def moveFilesFromSourceToDestination(source, destination, files=None, extraFiles
                     print(f'{fullDest} exists and overwrite not specified')
             else:
                 os.rename(fullSource, fullDest)
+                if f not in ("grade.txt", "help.txt"):
+                    shutil.copy(fullDest, f"{fullDest}-save")
         elif f not in ('messages.txt', 'grade.txt', 'grade-save.txt', 'help.txt'):
             print(f'{fullSource} does not exist')
             
@@ -98,7 +101,8 @@ def moveFilesFromSourceToDestination(source, destination, files=None, extraFiles
                 print(f'{fullDest} exists and overwrite not specified')
             else:
                 os.rename(fullSource, fullDest)
-    
+                shutil.copy(fullDest, f"{fullDest}-save")
+
     # create grade.txt if does not exist
     fullGradePath = os.path.join(destination, "grade.txt")
     if not os.path.exists(fullGradePath):
