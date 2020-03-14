@@ -6,7 +6,7 @@
 # 11/25/2019
 # ----------------------------------------------------------------------
 
-import sys
+import argparse
 import re
 import glob
 
@@ -14,7 +14,7 @@ from RosterInfo import *
 
 # ----------------------------------------------------------------------
 
-def main(argv):
+def main():
     course = None
     cwd = os.getcwd()
     result = re.findall(r"CS\d\d\d", cwd)
@@ -31,8 +31,19 @@ def main(argv):
         print("must be in directory where Grade directory is or in the directory with email addresses as directories")
         return
 
+    parser = argparse.ArgumentParser(description='split student directories by section')
+    parser.add_argument('sections', type=str, nargs='*', help="an even number of values that has the directoryNameForSection fileWithSectionEmailAddresses for each section")
+    parser.set_defaults(dryrun=False, messages=True)
+    args = parser.parse_args()
+
     rosterInfo = RosterInfo()
-    rosterInfo.readRostersFromEnvironmentVariable("ROSTERS")
+    if len(args.sections) == 0:
+        rosterInfo.readRostersFromEnvironmentVariable("ROSTERS")
+    elif len(args.sections) % 2 != 0:
+        print("must have an even number of values")
+    else:
+        courseAndFilenames = tuple(zip(*(iter(args.sections),) * 2))
+        rosterInfo.readRosters(courseAndFilenames)
 
     cwd = os.getcwd()
 
@@ -68,4 +79,4 @@ def main(argv):
 # ----------------------------------------------------------------------
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
