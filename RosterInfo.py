@@ -81,6 +81,14 @@ class RosterInfo:
 
     # ------------------------------------------------------------------
 
+    def courseWithName(self, name):
+        for c in self._courses:
+            if c.name() == name:
+                return c
+        return None
+
+    # ------------------------------------------------------------------
+
     def findStudentByEmail(self, email):
         return self.emailToStudent[email]
 
