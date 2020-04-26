@@ -141,12 +141,12 @@ class RosterInfo:
                     if lineCount == 0:
                         for index, value in enumerate(row):
                             headerDict[value] = index
-                        for field in ("firstName", "first"):
+                        for field in ("firstName", "first", "First"):
                             try:
                                 firstNameIndex = headerDict[field]
                             except:
                                 pass
-                        for field in ("lastName", "last"):
+                        for field in ("lastName", "last", "Last"):
                             try:
                                 lastNameIndex = headerDict[field]
                             except:
