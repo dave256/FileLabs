@@ -26,6 +26,9 @@ def main():
     rosterInfo = RosterInfo()
     if len(args.sections) == 0:
         rosterInfo.readRostersFromEnvironmentVariable("ROSTERS")
+    # if just a filename, get email addresses from that
+    elif len(args.sections) == 1:
+        rosterInfo.readRosters(( (args.course, args.sections[0]),))
     elif len(args.sections) % 2 != 0:
         print("must have an even number of values")
     else:
