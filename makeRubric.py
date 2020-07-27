@@ -8,7 +8,7 @@
 
 def main():
     rubric = """75 Correctness
-3 other issue
+3 other minor issue
 5 other minor issue
 10 other issue
 
