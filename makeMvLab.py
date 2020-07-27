@@ -25,6 +25,12 @@ def main():
     files = ' '.join(args.files)
 
     filename = args.scriptName
+
+    if filename.split(".")[-1] != "zsh":
+        print("you probably forgot to enter the filename you wanted for the script so stopping to avoid overwriting your program files")
+        print("makeMvLab.py mvScriptName.zsh [source files]")
+        return
+
     with open(filename, 'w') as outfile:
         print("#!/bin/zsh\n", file=outfile)
         print(f"mvlab.py ../{dest} {files} help.txt", file=outfile)
