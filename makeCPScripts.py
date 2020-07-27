@@ -12,7 +12,7 @@ import os.path
 import shutil
 
 def main():
-    parser = argparse.ArgumentParser(description='create script to mv files')
+    parser = argparse.ArgumentParser(description='create CodePost upload and download scripts')
     parser.add_argument('-l', '--labName', dest='labName', type=str, default=None,
                         help='lab name for CodePost')
     parser.add_argument('-c', '--course', dest='course', type=str, default=None,
