@@ -17,7 +17,6 @@ def main():
                         help='lab name for CodePost')
     parser.add_argument('-c', '--course', dest='course', type=str, default=None,
                         help='course name for CodePost')
-    parser.add_argument('scriptName', type=str)
     parser.add_argument('files', type=str, nargs='+')
 
     args = parser.parse_args()
