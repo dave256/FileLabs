@@ -25,7 +25,11 @@ def main():
     files = ' '.join(args.files)
 
     filename = args.scriptName
-
+    # insert mv if not first two characters
+    if filename[:2] != 'mv':
+        filename = f"mv{filename[0].upper()}{filename[1:]}"
+    
+    # if filename does not end with .zsh abort
     if filename.split(".")[-1] != "zsh":
         print("you probably forgot to enter the filename you wanted for the script so stopping to avoid overwriting your program files")
         print("makeMvLab.py mvScriptName.zsh [source files]")
