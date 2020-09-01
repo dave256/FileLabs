@@ -6,6 +6,8 @@
 # 11/25/2019
 # ----------------------------------------------------------------------
 
+from __future__ import annotations
+
 import os
 import os.path
 import csv
@@ -51,6 +53,12 @@ class Course:
         
     def students(self):
         return self._students
+
+    def __str__(self):
+        return self._name
+
+    def __lt__(self, other: Course):
+        return self._name < other._name
     
 # ----------------------------------------------------------------------
 

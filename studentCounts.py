@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 # ----------------------------------------------------------------------
-# emailsForSection.py
+# studentCounts.py
 # Dave Reed
-# 03/14/2020
+# 09/01/2020
 # ----------------------------------------------------------------------
 
 import argparse
@@ -16,28 +16,24 @@ from RosterInfo import *
 
 def main():
 
-    parser = argparse.ArgumentParser(description='email addresses for a section')
-    parser.add_argument('-c', '--course-name', dest='course', default=None, help='name of course/section for which to list email addresses')
-
+    parser = argparse.ArgumentParser(description='count of students in sections')
     parser.add_argument('sections', type=str, nargs='*', help="an even number of values that has the directoryNameForSection fileWithSectionEmailAddresses for each section")
     args = parser.parse_args()
 
     rosterInfo = RosterInfo()
     if len(args.sections) == 0:
         rosterInfo.readRostersFromEnvironmentVariable("ROSTERS")
-    # if just a filename, get email addresses from that
-    elif len(args.sections) == 1:
-        rosterInfo.readRosters(( (args.course, args.sections[0]),))
     elif len(args.sections) % 2 != 0:
         print("must have an even number of values")
     else:
         courseAndFilenames = tuple(zip(*(iter(args.sections),) * 2))
         rosterInfo.readRosters(courseAndFilenames)
 
-
-    course = rosterInfo.courseWithName(args.course)
-    for s in course.students():
-        print(s.email)
+    courses = rosterInfo.courses()
+    courses.sort()
+    for c in courses:
+        students = c.students()
+        print(f"{str(c):15} {len(students):2}")
 
     return
 
