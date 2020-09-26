@@ -32,7 +32,8 @@ def main():
 -5 did bonus
 
 30 Deductions
-2 missing your name at top of file
+2 missing your name in comments at top of file
+2 missing file name in comments at top of file
 2 did not submit help.txt
 5 late
 10 late
