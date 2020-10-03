@@ -76,12 +76,16 @@ def moveFilesFromSourceToDestination(source, destination, files=None, extraFiles
         destExists = os.path.exists(fullDest)
         if sourceExists:
             if destExists and not overwrite:
+                print("dest exists and not overwrite")
                 if f in ("grade.txt", "messages.txt", "help.txt"):
                     # combine the contents of these files if they already exist
                     tempFile = os.path.join(source, "newTempFile.txt")
                     cmd = f"cat {fullDest} {fullSource} > {tempFile}"
                     os.system(cmd)
                     os.rename(tempFile, fullDest)
+                    cmd = f"/bin/rm -f {fullSource}"
+                    os.system(cmd)
+                    # shutil.rmtree(fullSource, ignore_errors=True)
                 else:
                     print(f'{fullDest} exists and overwrite not specified')
             else:
