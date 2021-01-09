@@ -22,8 +22,6 @@ def main():
     if dest is None:
         dest = os.getcwd().split(os.sep)[-1]
 
-    files = ' '.join(args.files)
-
     filename = args.scriptName
     # insert mv if not first two characters
     if filename[:2] != 'mv':
@@ -35,11 +33,19 @@ def main():
         print("makeMvLab.py mvScriptName.zsh [source files]")
         return
 
+    files = []
+    for f in args.files:
+        lastSlash = f.rfind("/")
+        if lastSlash != -1:
+            f = f[lastSlash+1:]
+        files.append(f)
+    files = ' '.join(files)
     with open(filename, 'w') as outfile:
         print("#!/bin/zsh\n", file=outfile)
         print(f"mvlab.py ../{dest} {files} help.txt", file=outfile)
     os.system(f"chmod 755 {filename}")
 
+    files = ' '.join(args.files)
     filename = f"check{filename[2:]}"
     with open(filename, 'w') as outfile:
         print("#!/bin/zsh\n", file=outfile)
