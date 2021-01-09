@@ -32,9 +32,10 @@ def main():
 -5 did bonus
 
 30 Deductions
-2 missing your name in comments at top of file
-2 missing file name in comments at top of file
+2 missing your name and/or course time in comments at top of file
 2 did not submit help.txt
+2 file(s) not named properly
+5 incorrect files submitted
 5 late
 10 late
 20 late
