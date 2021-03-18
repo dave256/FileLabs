@@ -142,6 +142,10 @@ def main():
     
     if os.path.exists("Grade") and os.path.isdir("Grade"):
         os.chdir("Grade")
+
+    # make certain destination starts with parent directory so moves out of Grade directory
+    if args.dest[:3] != "../":
+        args.dest = f"../{args.dest}"
     
     makeDirectoryIfDoesNotExist(args.dest)
 
