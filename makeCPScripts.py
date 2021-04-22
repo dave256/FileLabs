@@ -33,7 +33,14 @@ def main():
     if course is None:
         course = input("enter course name: ")
 
-    files = ' '.join(args.files)
+    # handle files from command line with / by just using last path component
+    files = []
+    for f in args.files:
+        lastSlash = f.rfind("/")
+        if lastSlash != -1:
+            f = f[lastSlash + 1:]
+        files.append(f)
+    files = ' '.join(files)
 
     cmd = f"""#!/bin/zsh
 
