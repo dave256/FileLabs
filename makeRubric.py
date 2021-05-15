@@ -6,12 +6,24 @@
 # 07/24/2020
 # ----------------------------------------------------------------------
 
-def main():
-    rubric = """75 Correctness
+from argparse import ArgumentParser
+
+def rubricString(withHelpDeductions: bool = False):
+    if withHelpDeductions:
+        helpDeductions = """1 help deduction
+2 help deduction
+3 help deduction
+5 help deduction
+10 help deduction
+"""
+    else:
+        helpDeductions = ""
+    
+    rubric = f"""75 Correctness
 3 other minor issue
 5 other minor issue
 10 other issue
-
+{helpDeductions}
 15 Organization/Style
 0 other style issue
 2 other style issue
@@ -39,10 +51,21 @@ def main():
 5 late
 10 late
 20 late
+
 """
+    return rubric
+
+def main():
+    parser = ArgumentParser(description="make rubric.txt with generic rubric")
+    parser.add_argument("-d", "--help-deductions", dest="helpDeductions", action="store_true", help="add deductions for getting help from instructor")
+
+    options = parser.parse_args()
+
+    rubric = rubricString(options.helpDeductions)
 
     with open("rubric.txt", 'w') as outfile:
         print(rubric, file=outfile)
+        
 # ----------------------------------------------------------------------
 
 main()
