@@ -83,7 +83,11 @@ class RosterInfo:
             return self.fullNameToStudent[fullName]
         else:
             if self.lastNameToStudent is not None:
-                firstName, lastName = fullName.split(" ")
+                nameFields = fullName.split(" ")
+                if nameFields[-1].upper() in ("II", "III", "IV", "JR", "JR."):
+                    del nameFields[-1]
+                firstName = nameFields[0]
+                lastName = nameFields[-1]
                 if lastName in self.lastNameToStudent:
                     return self.lastNameToStudent[lastName]
 
@@ -110,11 +114,6 @@ class RosterInfo:
     # ------------------------------------------------------------------
 
     def _addOrUpdateStudent(self, firstName, lastName, email, course):
-        nameFields = lastName.split(" ")
-        if len(nameFields) > 1:
-            if nameFields[-1].upper() in ("II", "III", "IV", "JR", "JR."):
-                del nameFields[-1]
-                lastName = " ".join(nameFields)
         fullName = f"{firstName} {lastName}"
         if email in self.emailToStudent:
             s = self.emailToStudent[email]
