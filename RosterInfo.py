@@ -110,6 +110,11 @@ class RosterInfo:
     # ------------------------------------------------------------------
 
     def _addOrUpdateStudent(self, firstName, lastName, email, course):
+        nameFields = lastName.split(" ")
+        if len(nameFields) > 1:
+            if nameFields[-1].upper() in ("II", "III", "IV", "JR", "JR."):
+                del nameFields[-1]
+                lastName = " ".join(nameFields)
         fullName = f"{firstName} {lastName}"
         if email in self.emailToStudent:
             s = self.emailToStudent[email]
@@ -191,3 +196,4 @@ class RosterInfo:
 
 # ----------------------------------------------------------------------
 
+        
