@@ -20,6 +20,8 @@ def rubricString(withHelpDeductions: bool = False):
         helpDeductions = ""
     
     rubric = f"""75 Correctness
+1 other minor issue
+2 other minor issue
 3 other minor issue
 5 other minor issue
 10 other issue
@@ -48,6 +50,7 @@ def rubricString(withHelpDeductions: bool = False):
 2 did not submit help.txt
 2 file(s) not named properly
 5 incorrect files submitted
+3 late
 5 late
 10 late
 20 late
