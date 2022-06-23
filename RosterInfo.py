@@ -86,6 +86,9 @@ class RosterInfo:
                 nameFields = fullName.split(" ")
                 if nameFields[-1].upper() in ("II", "III", "IV", "JR", "JR."):
                     del nameFields[-1]
+                # handle pronouns that might be there after (
+                elif len(nameFields[-1]) > 0 and nameFields[-1] == "(":
+                    del nameFields[-1]
                 firstName = nameFields[0]
                 lastName = nameFields[-1]
                 if lastName in self.lastNameToStudent:
