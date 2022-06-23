@@ -79,20 +79,27 @@ class RosterInfo:
     # ------------------------------------------------------------------
 
     def findStudentByName(self, fullName):
+        nameFields = fullName.split()
         if fullName in self.fullNameToStudent:
             return self.fullNameToStudent[fullName]
-        else:
-            if self.lastNameToStudent is not None:
-                nameFields = fullName.split(" ")
-                if nameFields[-1].upper() in ("II", "III", "IV", "JR", "JR."):
-                    del nameFields[-1]
-                # handle pronouns that might be there after (
-                elif len(nameFields[-1]) > 0 and nameFields[-1] == "(":
-                    del nameFields[-1]
-                firstName = nameFields[0]
-                lastName = nameFields[-1]
-                if lastName in self.lastNameToStudent:
-                    return self.lastNameToStudent[lastName]
+        # handle pronouns or preferred name that might be there after (
+        elif len(nameFields[-1]) > 0 and nameFields[-1][0] == "(":
+            del nameFields[-1]
+            fullName = " ".join(nameFields)
+            if fullName in self.fullNameToStudent:
+                return self.fullNameToStudent[fullName]
+            
+        if self.lastNameToStudent is not None:
+            # remove generation value
+            if nameFields[-1].upper() in ("II", "III", "IV", "JR", "JR."):
+                del nameFields[-1]
+            firstName = nameFields[0]
+            lastName = nameFields[-1]
+            if lastName in self.lastNameToStudent:
+                return self.lastNameToStudent[lastName]
+            else:
+                print(f"{firstName} {lastName} not found")
+        print(f"unable to find {fullName}")
 
     # ------------------------------------------------------------------
 
