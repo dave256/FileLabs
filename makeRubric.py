@@ -19,14 +19,14 @@ def rubricString(withHelpDeductions: bool = False):
     else:
         helpDeductions = ""
     
-    rubric = f"""75 Correctness
+    rubric = f"""80 Correctness
 1 other minor issue
 2 other minor issue
 3 other minor issue
 5 other minor issue
 10 other issue
 {helpDeductions}
-15 Organization/Style
+10 Organization/Style
 0 other style issue
 2 other style issue
 2 use descriptive variable names
