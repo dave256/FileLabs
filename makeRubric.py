@@ -31,6 +31,7 @@ def rubricString(withHelpDeductions: bool = False):
 2 other style issue
 2 use descriptive variable names
 5 use descriptive variable names
+2 put a space between operators and operands 2 + 3, not 2+3
 2 follow naming conventions (camelCase for variables/functions, CamelCase for classes)
 2 spacing between sections of code and functions
 2 extra unnecessary code
