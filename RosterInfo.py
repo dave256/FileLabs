@@ -179,11 +179,12 @@ class RosterInfo:
                             except:
                                 pass
                     else:
-                        firstName = row[firstNameIndex]
-                        lastName = row[lastNameIndex]
-                        email = row[emailIndex]
-                        s = self._addOrUpdateStudent(firstName, lastName, email, course)
-                        courseObject.addStudent(s)
+                        if len(row) > 0:
+                            firstName = row[firstNameIndex]
+                            lastName = row[lastNameIndex]
+                            email = row[emailIndex]
+                            s = self._addOrUpdateStudent(firstName, lastName, email, course)
+                            courseObject.addStudent(s)
 
                     lineCount += 1
 
