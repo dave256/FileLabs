@@ -144,7 +144,7 @@ class RosterInfo:
 
     # ------------------------------------------------------------------
     
-    def courseAndFilenames():
+    def courseAndFilenames(self):
         return self._courseAndFilenames
 
     # ------------------------------------------------------------------
