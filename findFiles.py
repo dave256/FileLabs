@@ -77,7 +77,7 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
             matchDict[f] = f
             del filesToMatch[f]
             del filesInDir[f]
-    
+
     # find any where they match except for the case
     for f in list(filesToMatch.keys()):
         for inDir in list(filesInDir.keys()):
@@ -133,9 +133,57 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
             matchDict[f] = matchedFile
             filesToMatch = {}
             del filesInDir[matchedFile]
-    
+
+    # if still didn't find all files
+    if len(filesToMatch) != 0:
+        # print("NOT ALL FILES MATCH")
+        # make a set of the ones left to match
+        leftToMatch = set(filesToMatch.keys())
+        # keep track of files we think match (maps file we're trying to find to student filename)
+        leftDict = {}
+
+        # for each remaining file to be found
+        for f in filesToMatch:
+            # split wihtout extension and convert to lower case
+            fBase, fExt = os.path.splitext(f)
+            fBase = fBase.lower()
+
+            # look for it in remaining student files
+            for left in filesInDir:
+                leftBase, leftExt = os.path.splitext(left)
+                # if the file we are looking for is contained within student filename, we may have found it
+                # print(fBase.lower(), leftBase.lower())
+                if fBase.lower() in leftBase.lower():
+                    # map file we are trying to find to student filename
+                    leftDict[f] = left
+                    leftToMatch.remove(f)
+
+        # if we found a match for all remaining files
+        if len(leftToMatch) == 0 and len(leftDict) != 0:
+            # print(f"matched: {leftDict}")
+            # put these in files we've found
+            matchDict.update(leftDict)
+            # remove from list of files we need to find yet and files still remaining
+            for k in leftDict:
+                del filesToMatch[k]
+                del filesInDir[leftDict[k]]
+
+    # if still haven't found help.txt
     if helpMissing:
-        filesToMatch['help.txt'] = 1
+        foundHelp = False
+        # if any file remaining contains the word help regardless of case, use it
+        if len(filesInDir) > 0:
+            for f in filesInDir:
+                if "help" in f.lower():
+                    matchDict['help.txt'] = f
+                    foundHelp = True
+                    break
+        # we found some file with help.txt so remove that from extra files
+        if foundHelp:
+            del filesInDir[f]
+        # else still didn't find help.txt so indicate it's in the files we still haven't found
+        else:
+            filesToMatch['help.txt'] = 1
 
     # return the dictionary mapping the name of the file we expect to find to the actual file found,
     # the list of missing files, and the list of extra files
