@@ -79,6 +79,12 @@ class RosterInfo:
     # ------------------------------------------------------------------
 
     def findStudentByName(self, fullName):
+        # look for paren which may contain what student entered for pronouns
+        parenPos = fullName.rfind("(")
+        if parenPos != -1:
+            # remove the paren and afterwards
+            fullName = fullName[:parenPos].strip()
+
         nameFields = fullName.split()
         if fullName in self.fullNameToStudent:
             return self.fullNameToStudent[fullName]
