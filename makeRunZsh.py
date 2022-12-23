@@ -23,10 +23,10 @@ if [ ! -f grade.txt ]; then
 fi
 
 make_sep.sh
-if [ -d $DIR/test ]; then
-    /bin/cp -f $DIR/test/test*.py .
-    testExists=true
-fi
+#if [ -d $DIR/test ]; then
+#    /bin/cp -f $DIR/test/test*.py .
+#    testExists=true
+#fi
 
 echo -e "\\ntest\\n" > test
 echo -e "\\ndiff\\n" > diff
@@ -48,10 +48,11 @@ def main():
         return
     
     parser = argparse.ArgumentParser(description='create script to mv files')
+    parser.add_argument("-t", "--tests", help="copy and run unit test", action="store_true")
     parser.add_argument('files', type=str, nargs='+')
 
     args = parser.parse_args()
-
+    
     files = []
     for f in args.files:
         lastSlash = f.rfind("/")
@@ -61,12 +62,30 @@ def main():
     
     runLines = []
     count = 1
+    testOut = []
     for f in files:
         extension = pathlib.Path(f).suffix[1:]
         if extension == "py":
-            cmd = f"echo -e "" | python3 {f} |& > out{count}.txt | cat"
+            if args.tests:
+                testName = f"test_{f}"
+                testPath = None
+                for path in (".", "test", '..', '../test'):
+                    localPath = f"{path}/{testName}"
+                    if os.path.exists(localPath):
+                        testPath = localPath
+                        break
+                if testPath is not None:
+                    myTestName = f"myTest{f[0].upper() + f[1:]}"
+                    cmd = f'/bin/cp $DIR/{testPath} {myTestName}'
+                    runLines.append(cmd)
+                    cmd = f'python3 {myTestName} |& > test{count}.txt | cat'
+                    runLines.append(cmd)
+                    testOut.append(f"test{count}.txt")
+            cmd = f'echo -e "" | python3 {f} |& > out{count}.txt | cat'
+                
+            
         elif extension == "swift":
-            cmd = f"swift {f} |& > out{count}.txt | cat"
+            cmd = f'swift {f} |& > out{count}.txt | cat'
         
         runLines.append(cmd)
         count += 1
@@ -74,6 +93,9 @@ def main():
     runLines = "\n".join(runLines)
     
     catCmd = []
+    if len(testOut) > 0:
+        for s in testOut:
+            catCmd.append(f"sep {s}")
     for i in range(1, count):
         catCmd.append(f"sep out{i}.txt")
         
