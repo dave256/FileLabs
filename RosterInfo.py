@@ -7,14 +7,31 @@
 # ----------------------------------------------------------------------
 
 from __future__ import annotations
+from dataclasses import dataclass
+from typing import List, Dict, Optional
 
+import re
 import os
 import os.path
 import csv
+import zipfile
+import FileUtils
+
+
+@dataclass
+class EmailFile:
+    email: str
+    filename: str
+
 
 class Student:
 
-    def __init__(self, firstName, lastName, email):
+    firstName: str
+    lastName: str
+    email: str
+    courses: List[Course]
+
+    def __init__(self, firstName: str, lastName: str, email: str):
         self.firstName = firstName
         self.lastName = lastName
         self.email = email
@@ -22,8 +39,18 @@ class Student:
 
     # ------------------------------------------------------------------
 
-    def addCourse(self, course):
+    def addCourse(self, course: Course):
         self.courses.append(course)
+
+    def matchesLastNameFirstName(self, s: str) -> bool:
+        """
+        :param s: string of the form lastnamefirstname
+        :return: True if this student matches that or False otherwise
+        """
+        s = s.lower()
+        last = self.lastName.lower()
+        first = self.firstName.lower()
+        return s.startswith(last) and s[len(last):].startswith(first)
 
     # ------------------------------------------------------------------
 
@@ -32,12 +59,26 @@ class Student:
 
 # ----------------------------------------------------------------------
 
+
 class Course:
-    
+
+    _name: str
+    _rosterFilename: str
+    _students: List[Student]
+    # keys are lowercase of last name
+    _byLastName: Dict[str, List[Student]]
+
     def __init__(self, courseWithSection, rosterFileName):
         self._name = courseWithSection
         self._rosterFilename = rosterFileName
         self._students = []
+        self._byLastName = {}
+
+    def clone(self) -> Course:
+        c = Course(self._name, self._rosterFilename)
+        c._students = self._students[:]
+        c._byLastName = self._byLastName.copy()
+        return c
 
     def filename(self):
         return self._rosterFilename
@@ -45,24 +86,78 @@ class Course:
     def rosterDirectory(self):
         return os.path.dirname(self._rosterFilename)
 
-    def name(self):
+    def name(self) -> str:
         return self._name
 
-    def addStudent(self, s):
+    def addStudent(self, s: Student):
         self._students.append(s)
-        
-    def students(self):
+        if s.lastName.lower() in self._byLastName:
+            self._byLastName[s.lastName.lower()].append(s)
+        else:
+            self._byLastName[s.lastName.lower()] = [s]
+
+    def students(self) -> List[Student]:
         return self._students
 
-    def __str__(self):
+    def studentMatchingLastNameFirstName(self, s: str) -> Optional[Student]:
+        for student in self._students:
+            if student.matchesLastNameFirstName(s):
+                return student
+        return None
+
+    def __str__(self) -> str:
         return self._name
 
-    def __lt__(self, other: Course):
+    def __lt__(self, other: Course) -> bool:
         return self._name < other._name
-    
+
+    def findStudentBySubmissionFile(self, path: str) -> Optional[EmailFile]:
+        firstPos = path.find("_")
+        secondPos = path.find("_", firstPos + 1)
+        thirdPos = path.find("_", secondPos + 1)
+
+        if firstPos != -1 and secondPos != -1:
+            filename = path[thirdPos + 1:]
+            # break into name and extension (extension contains the period)
+            name, extension = os.path.splitext(filename)
+            # check if filename portion ends in "-1", etc. for resubmissions
+            dashDigits = re.compile(r"-(\d)+$")
+            result = dashDigits.search(name)
+            if result is not None:
+                # cut off the characters at the end with the dash as they were resubmissions
+                name = name[:result.span()[0]]
+                filename = name + extension
+
+            user = path[:firstPos].lower()
+            for student in self._students:
+                if student.matchesLastNameFirstName(user):
+                    return EmailFile(student.email, filename)
+                # lowerLast = student.lastName.lower()
+                # if user.startswith(lowerLast):
+                #     # if last name exists
+                #     if lowerLast in self._byLastName:
+                #         students = self._byLastName[lowerLast]
+                #         # if only one student with this last name, found them
+                #         if len(students) == 1:
+                #             return EmailFile(students[0].email, filename)
+                #         else:
+                #             # remove lastName from beginning of string
+                #             withoutLast = user[len(lowerLast):]
+                #             for s in students:
+                #                 if withoutLast.startswith(s.firstName.lower()):
+                #                     return EmailFile(s.email, filename)
+        print(f"couldn't match {path}")
+        return None
+
+
 # ----------------------------------------------------------------------
 
 class RosterInfo:
+
+    lastNameToStudent: Dict[str, Student]
+    fullNameToStudent: Dict[str, Student]
+    emailToStudent: Dict[str, Student]
+    _courses: List[Course]
 
     def __init__(self):
 
@@ -78,7 +173,7 @@ class RosterInfo:
 
     # ------------------------------------------------------------------
 
-    def findStudentByName(self, fullName):
+    def findStudentByName(self, fullName: str):
         # look for paren which may contain what student entered for pronouns
         parenPos = fullName.rfind("(")
         if parenPos != -1:
@@ -109,11 +204,25 @@ class RosterInfo:
 
     # ------------------------------------------------------------------
 
-    def courseWithName(self, name):
+    def courseWithName(self, name: str) -> Optional[Course]:
         for c in self._courses:
             if c.name() == name:
                 return c
         return None
+
+    # ------------------------------------------------------------------
+
+    def mergedCourse(self, namePrefix: str) -> Optional[Course]:
+        result: Optional[Course] = None
+        for c in self._courses:
+            if c.name().startswith(namePrefix):
+                if result is None:
+                    result = c.clone()
+                else:
+                    result._name += f" + {c.name()}"
+                    for s in c.students():
+                        result.addStudent(s)
+        return result
 
     # ------------------------------------------------------------------
 
@@ -193,6 +302,47 @@ class RosterInfo:
                             courseObject.addStudent(s)
 
                     lineCount += 1
+
+    # ------------------------------------------------------------------
+
+    def determineCourse(self, zipPath: str) -> Optional[str]:
+        """
+        tries to determine course based on student filenames in zip file
+        if finds, returns something such as CS261-9 (or CS261 if students from multiple sections of CS261)
+        :param zipPath: path to the zip file
+        :return: courseName if found or None if couldn't determine
+        """
+        with zipfile.ZipFile(zipPath, "r") as infile:
+            infoList: List[zipfile.ZipInfo] = infile.infolist()
+            filenames = [FileUtils.FileInfo(info.filename).fileName() for info in infoList]
+            # get filenames that are not empty and don't start with a period
+            filenames = [s for s in filenames if s != "" and s[0] != "."]
+            # get everything up to first underscore which should be lastfirst for the person
+            users = set([s.split("_")[0] for s in filenames])
+            courseDict = {}
+            for c in self._courses:
+                courseDict[c.name()] = set()
+                for user in users:
+                    student: Optional[Student] = c.studentMatchingLastNameFirstName(user)
+                    if student is not None:
+                        courseDict[c.name()].add(student)
+
+            nonZero = []
+            for courseName in courseDict:
+                if len(courseDict[courseName]) > 0:
+                    nonZero.append(courseName)
+
+            if len(nonZero) == 1:
+                return nonZero[0]
+            else:
+                result = set()
+                for name in nonZero:
+                    # remove section and add to set
+                    result.add(name.split("-")[0])
+                if len(result) == 1:
+                    return result.pop()
+
+            return None
 
     # ------------------------------------------------------------------
 
