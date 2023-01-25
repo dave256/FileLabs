@@ -89,6 +89,11 @@ def main():
         elif extension == "swift":
             cmd = f'swift {f} |& > out{count}.txt | cat'
         
+        elif extension == "cpp":
+            exe = f.split('.')[0]
+            cmd = f"clang++ -std=c++20 -o {exe} {f} |& > com{count}.txt | cat" 
+            runLines.append(cmd)
+            cmd = f"./{exe} |& > out{count}.txt | cat"
         runLines.append(cmd)
         count += 1
     
