@@ -78,7 +78,7 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
             del filesToMatch[f]
             del filesInDir[f]
 
-    # find any where they match except for the case
+    # find any in which they match except for the case
     for f in list(filesToMatch.keys()):
         for inDir in list(filesInDir.keys()):
             if f.lower() == inDir.lower():
@@ -87,7 +87,7 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
                 del filesInDir[inDir]
                 break
                 
-    # find any where they match except for the extension or case
+    # find any in which they match except for the extension or case
     for f in list(filesToMatch.keys()):
         fBase, fExt = os.path.splitext(f)
         for inDir in list(filesInDir.keys()):
@@ -108,8 +108,7 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
                 helpMissing = False
                 break
         del filesToMatch['help.txt']
-    
-    
+
     # if only one file left to match and only one file left in directory
     if len(filesToMatch) == 1 and len(filesInDir) == 1:
         f = list(filesToMatch.keys())[0]
@@ -142,21 +141,37 @@ def findFilesInList(files, listOfFiles, ignoreGradeTxt=True, filesToIgnore=None)
         # keep track of files we think match (maps file we're trying to find to student filename)
         leftDict = {}
 
-        # for each remaining file to be found
-        for f in filesToMatch:
-            # split wihtout extension and convert to lower case
+        # for each remaining file to be found sorted by decreasing length
+        filesToMatchSortedByDecreasingLength = list(filesToMatch.keys())
+        filesToMatchSortedByDecreasingLength.sort(key=len)
+        filesToMatchSortedByDecreasingLength.reverse()
+        # print("files to match", filesToMatchSortedByDecreasingLength)
+
+        filesInDirCopy = filesInDir.copy()
+
+        for f in filesToMatchSortedByDecreasingLength:
+            # split without extension and convert to lower case
             fBase, fExt = os.path.splitext(f)
             fBase = fBase.lower()
 
             # look for it in remaining student files
-            for left in filesInDir:
+            filesInDirSortedByDecreasingLength = list(filesInDirCopy.keys())
+            filesInDirSortedByDecreasingLength.sort(key=len)
+            filesInDirSortedByDecreasingLength.reverse()
+            for left in filesInDirSortedByDecreasingLength:
+                # print("checking if", left, "could be", f)
                 leftBase, leftExt = os.path.splitext(left)
                 # if the file we are looking for is contained within student filename, we may have found it
-                # print(fBase.lower(), leftBase.lower())
                 if fBase.lower() in leftBase.lower():
+                    # print("matching", left, "as", f)
+                    # print(leftToMatch)
                     # map file we are trying to find to student filename
                     leftDict[f] = left
                     leftToMatch.remove(f)
+                    # once we match, don't try to match this file again
+                    del filesInDirCopy[left]
+                    # stop trying to match this file in directory 
+                    break
 
         # if we found a match for all remaining files
         if len(leftToMatch) == 0 and len(leftDict) != 0:
