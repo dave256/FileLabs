@@ -18,6 +18,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='email addresses for a section')
     parser.add_argument('-c', '--course-name', dest='course', default=None, help='name of course/section for which to list email addresses')
+    parser.add_argument('-s', '--spacing', dest='spacing', type=int, default=0, help='number of blank lines between email addresses')
 
     parser.add_argument('sections', type=str, nargs='*', help="an even number of values that has the directoryNameForSection fileWithSectionEmailAddresses for each section")
     args = parser.parse_args()
@@ -38,6 +39,7 @@ def main():
     course = rosterInfo.courseWithName(args.course)
     for s in course.students():
         print(s.email)
+        print(args.spacing * "\n", end="")
 
     return
 
