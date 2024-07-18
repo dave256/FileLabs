@@ -12,10 +12,16 @@ import os.path
 import shutil
 
 def main():
-    parser = argparse.ArgumentParser(description='create script to mv files')
+    parser = argparse.ArgumentParser(description="""create script to mv files
+        example usage:
+        makeMvLab.py mv.zsh -f a.py b.py ;
+        makeMvLab.py mv.zsh -f a.py b.py -c file.zip (this creates check.zsh that will make file.zip) ;
+        makeMvLab.py mv.zsh -d GradingDirectory -f a.py b.py (by default GradingDirectory is the last path in CWD)
+    """)
     parser.add_argument('-d', '--dest', dest='dest', type=str, default=None, help='destination directory to put subdirectories and files in')
-    parser.add_argument('scriptName', type=str)
-    parser.add_argument('files', type=str, nargs='+')
+    parser.add_argument('scriptName', type=str, help='name of the script to create such as mv.zsh')
+    parser.add_argument('-f', nargs='+', dest='files', help='files to find and move')
+    parser.add_argument('-c', nargs='*', dest='checkFiles', help='files for check.zsh to use')
 
     args = parser.parse_args()
     dest = args.dest
@@ -39,13 +45,18 @@ def main():
         if lastSlash != -1:
             f = f[lastSlash+1:]
         files.append(f)
+
+    checkFiles = args.checkFiles
+    if checkFiles is None or len(checkFiles) == 0:
+        checkFiles = files
+
     files = ' '.join(files)
     with open(filename, 'w') as outfile:
         print("#!/bin/zsh\n", file=outfile)
         print(f"mvlab.py ../{dest} {files} help.txt", file=outfile)
     os.system(f"chmod 755 {filename}")
 
-    files = ' '.join(args.files)
+    files = ' '.join(checkFiles)
     filename = f"check{filename[2:]}"
     with open(filename, 'w') as outfile:
         print("#!/bin/zsh\n", file=outfile)
