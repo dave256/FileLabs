@@ -60,7 +60,7 @@ def main():
     filename = f"check{filename[2:]}"
     with open(filename, 'w') as outfile:
         print("#!/bin/zsh\n", file=outfile)
-        print(f"maketest.py -a {files}", file=outfile)
+        print(f"maketest.py -a {' '.join(checkFiles)}", file=outfile)
     os.system(f"chmod 755 {filename}")
 
     cmd = f"""#!/bin/zsh
