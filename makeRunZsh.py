@@ -28,6 +28,8 @@ make_sep.sh
 #    testExists=true
 #fi
 
+# ln -s ~/Downloads/graphics.py .
+
 echo -e "my test\\n" > mytest
 echo -e "your test\\n" > yourtest
 echo -e "\\ntest\\n" > test
@@ -64,6 +66,7 @@ def main():
     runLines = []
     count = 1
     testOut = []
+    outputCount = 1
     for f in files:
         extension = pathlib.Path(f).suffix[1:]
         if extension == "py":
@@ -82,18 +85,21 @@ def main():
                 cmd = f'python3 {myTestName} |& > test{count}.txt | cat'
                 runLines.append(cmd)
                 testOut.append(f"test{count}.txt")
-            # run student submission
-            cmd = f'echo -e "" | python3 {f} |& > out{count}.txt | cat'
-                
+            # run student submission with two different inputs
+            cmd = f'echo -e "" | python3 {f} |& > out{outputCount}.txt | cat\necho -e "" | python3 {f} |& > out{outputCount + 1}.txt | cat'
+            outputCount += 2
+            
             
         elif extension == "swift":
-            cmd = f'swift {f} |& > out{count}.txt | cat'
+            cmd = f'swift {f} |& > out{ouputCount}.txt | cat'
+            outputCount += 1
         
         elif extension == "cpp":
             exe = f.split('.')[0]
             cmd = f"clang++ -std=c++20 -o {exe} {f} |& > com{count}.txt | cat" 
             runLines.append(cmd)
             cmd = f"./{exe} |& > out{count}.txt | cat"
+            outputCount += 1
         runLines.append(cmd)
         count += 1
     
@@ -107,7 +113,7 @@ def main():
                 catCmd.append(s)
             else:
                 catCmd.append(f"sep {s}")
-    for i in range(1, count):
+    for i in range(1, outputCount):
         catCmd.append(f"sep out{i}.txt")
         
     catCmd = f'cat {" ".join(catCmd)} sep grade.txt > new_grade'
