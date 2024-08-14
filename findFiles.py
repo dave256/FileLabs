@@ -260,7 +260,9 @@ def renameFiles(directory, matches, missing, extra, writeMessages=False, dryRun=
     for f in matches:
         if f != matches[f]:
             # each file that will need renamed based on our matching algorithm from findFilesInList
-            messages.append(f'mv {matches[f]} {f}')
+            # do not include renaming help.txt in the messages.txt
+            if f != "help.txt":
+                messages.append(f'mv {matches[f]} {f}')
             fullSource = os.path.join(directory, matches[f])
             fullDest = os.path.join(directory, f)
             # if not a dry run, rename the file
