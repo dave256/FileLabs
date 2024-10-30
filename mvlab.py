@@ -134,6 +134,7 @@ def main():
     parser.add_argument('files', type=str, nargs='*')
     parser.add_argument('-e', '--extra', dest='optionalFiles', type=str, nargs='+')
     parser.add_argument('-a', '--all', dest='allFiles', action='store_true', default=False)
+    parser.add_argument('--doNotUnzip', dest='doNotUnzip', action='store_true', default=False)
 
     parser.set_defaults(dryrun=False, overwrite=False, messages=True)
     args = parser.parse_args()
@@ -162,7 +163,7 @@ def main():
                     os.rename(f, newName)
         
         # next fix any naming issues
-        matches, missing, extra = findFilesInDirectory(d, args.files, True, args.optionalFiles)
+        matches, missing, extra = findFilesInDirectory(d, args.files, True, args.optionalFiles, not args.doNotUnzip)
         renameFiles(d, matches, missing, extra, args.messages, args.dryrun)
 
         if not args.dryrun:

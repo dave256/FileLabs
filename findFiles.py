@@ -13,7 +13,7 @@ import shutil
 
 # ----------------------------------------------------------------------
 
-def findFilesInDirectory(directory, files=None, ignoreGradeTxt=True, filesToIgnore=None):
+def findFilesInDirectory(directory, files=None, ignoreGradeTxt=True, filesToIgnore=None, unzipFiles=True):
 
     """look for files in directory and return dictionary with mapping of actual filenames, missing files, and extra files
 
@@ -25,35 +25,36 @@ def findFilesInDirectory(directory, files=None, ignoreGradeTxt=True, filesToIgno
     a list of the names from files that are missing,
     and a list of any extra names from listOfFiles that we did not use as dictionary values in the first return value
     """
-
+    
     # check if there is a zip file
     # for any zip files, unzip their contents and copy all their files (exclude directories and .xcassets)
     # to the directory before trying to find the specified files
-    for f in glob.glob(os.path.join(directory, '*.zip')):
-        extractPath = os.path.join(directory, "zipExtracted/")
-        try:
+    if unzipFiles:
+        for f in glob.glob(os.path.join(directory, '*.zip')):
+            extractPath = os.path.join(directory, "zipExtracted/")
+            try:
+                shutil.rmtree(extractPath)
+            except FileNotFoundError:
+                pass
+            os.mkdir(extractPath)
+            # extract the zip file
+            with zipfile.ZipFile(f, "r") as infile:
+                infile.extractall(path=extractPath)
+                zippedFiles = glob.glob(f"{extractPath}/**", recursive=True)
+                # copy all non-directory files to the directory parameter
+                for unzippedFile in zippedFiles:
+                    if not os.path.isdir(unzippedFile):
+                        # ignore files in .xcassets
+                        if unzippedFile.find(".xcassets") == -1:
+                            baseName = os.path.basename(unzippedFile)
+                            destPath = os.path.join(directory, baseName)
+                            if os.path.exists(destPath):
+                                if os.path.isdir(destPath):
+                                    shutil.rmtree(destPath)
+                                else:
+                                    os.remove(destPath)
+                            shutil.move(unzippedFile, destPath)
             shutil.rmtree(extractPath)
-        except FileNotFoundError:
-            pass
-        os.mkdir(extractPath)
-        # extract the zip file
-        with zipfile.ZipFile(f, "r") as infile:
-            infile.extractall(path=extractPath)
-            zippedFiles = glob.glob(f"{extractPath}/**", recursive=True)
-            # copy all non-directory files to the directory parameter
-            for unzippedFile in zippedFiles:
-                if not os.path.isdir(unzippedFile):
-                    # ignore files in .xcassets
-                    if unzippedFile.find(".xcassets") == -1:
-                        baseName = os.path.basename(unzippedFile)
-                        destPath = os.path.join(directory, baseName)
-                        if os.path.exists(destPath):
-                            if os.path.isdir(destPath):
-                                shutil.rmtree(destPath)
-                            else:
-                                os.remove(destPath)
-                        shutil.move(unzippedFile, destPath)
-        shutil.rmtree(extractPath)
 
     filesInDir = [f[len(directory)+1:] for f in glob.glob(os.path.join(directory, '*'))]
     return findFilesInList(files, filesInDir, ignoreGradeTxt, filesToIgnore)
