@@ -19,6 +19,7 @@ def main():
         makeMvLab.py mv.zsh -d GradingDirectory -f a.py b.py (by default GradingDirectory is the last path in CWD)
     """)
     parser.add_argument('-d', '--dest', dest='dest', type=str, default=None, help='destination directory to put subdirectories and files in')
+    parser.add_argument("-nh", dest="noHelp", default=False, action='store_true')
     parser.add_argument('scriptName', type=str, help='name of the script to create such as mv.zsh')
     parser.add_argument('-f', nargs='+', dest='files', help='files to find and move')
     parser.add_argument('-c', nargs='*', dest='checkFiles', help='files for check.zsh to use')
@@ -53,7 +54,10 @@ def main():
     files = ' '.join(files)
     with open(filename, 'w') as outfile:
         print("#!/bin/zsh\n", file=outfile)
-        print(f"mvlab.py ../{dest} {files} help.txt", file=outfile)
+        if args.noHelp:
+            print(f"mvlab.py ../{dest} {files}", file=outfile)
+        else:
+            print(f"mvlab.py ../{dest} {files} help.txt", file=outfile)
     os.system(f"chmod 755 {filename}")
 
     files = ' '.join(checkFiles)
