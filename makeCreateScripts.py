@@ -14,6 +14,7 @@ import sys
 def main():
     parser = argparse.ArgumentParser(description="""makes various grading scripts
         example usage:
+ makeCreateScripts.py -f ../../BlackjackCards/Sources/BlackjackCards/BlackjackHand.swift ../../BlackjackCards/Tests/BlackjackCardsTests/BlackjackHandXCTests.swift --copy /Users/dreed/Capital/CS261/gitsrc/BlackjackCards/Sources/BlackjackCards/
     """)
 
     parser.add_argument('-m', '--mv', dest='mv', type=str, default='mv.zsh', help='name of mv.zsh script')
@@ -50,3 +51,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
