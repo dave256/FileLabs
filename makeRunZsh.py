@@ -74,6 +74,7 @@ unzip -o Archive.zip
 /bin/rm -rf __MACOSX Archive.zip-save
 # copy all files with .swift extension to current directory
 find . -type f -name "*.swift" -exec cp {} . \;
+/bin/rm -f EmptyWidthStacks.swift EqualWidthStacks.swift SwiftUIHelpers.swift
 cat sep grade.txt > new_grade        
 """
         catCmd = "cat sep grade.txt > new_grade"
